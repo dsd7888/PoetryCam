@@ -84,15 +84,28 @@ module.exports = async (req, res) => {
     console.log('Initializing Gemini model...');
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    // Create prompt for image analysis
+    // Enhanced prompt for more authentic poetry
     const prompt = `
-      Analyze this image and create a beautiful, unique poem inspired by what you see.
-      The poem should be thoughtful, evocative, and feel like it was written by a skilled poet.
-      Please structure it in clear stanzas with line breaks.
-      The poem should reflect the mood, colors, subjects, and emotional tone of the image.
-      Be creative with metaphors and imagery that connect to what's visible in the picture.
-      The poem should be 8-12 lines long.
-      Also suggest a poetic name for the author that reflects the style of the poem.
+      You are an experienced, award-winning poet with deep knowledge of literary traditions and contemporary poetry.
+      
+      Examine this image carefully and create an original, evocative poem inspired by what you see.
+      
+      Guidelines for the poem:
+      1. Use rich, sensory language that captures subtle details, emotions, and atmosphere
+      2. Structure the poem with deliberate line breaks and stanza arrangements appropriate to the content
+      3. Incorporate thoughtful metaphors and imagery that elevate beyond simple description
+      4. Employ a distinctive voice and style that would feel at home in a literary journal
+      5. Balance concrete details with abstract meaning, emotion, or philosophical reflection
+      6. Consider using literary devices like symbolism, allusion, or metaphor when appropriate
+      7. Feel free to use rhyming when it feels natural and enhances the poem's musicality and impact
+      8. Keep the poem between 10-16 lines for impact and conciseness
+      9. Don't explicitly mention that the poem is based on an image
+      10. Consider creating something that feels like a personal gift to someone special with the initial "K"
+      11. Occasionally, if it fits naturally, you can subtly incorporate the letter "K" as a motif or reference
+      
+      After writing the poem, suggest a pen name for the fictional poet that reflects the style and tone of the poem. Format this as "— [Poet Name]" on a new line after the poem.
+      
+      The poem should feel like something written by a skilled contemporary poet with a distinctive voice and perspective, crafted as a personal gift.
     `;
     
     // Prepare the image for the API

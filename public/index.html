@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poetry Camera</title>
+    <title>K's Poetry Camera</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
@@ -13,14 +13,16 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital@0;1&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container mt-4">
         <!-- Header -->
         <header class="text-center mb-5">
-            <h1 class="app-title">Poetry Camera</h1>
-            <p class="app-tagline">Capture images, discover poetry.</p>
+            <div class="app-title-wrapper">
+                <h1 class="app-title">For You</h1>
+            </div>
+            <p class="app-tagline">Crafting poetry just for you.</p>
         </header>
         
         <!-- Main content -->
@@ -33,12 +35,12 @@
                         <ul class="nav nav-tabs card-header-tabs" id="inputTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="camera-tab" data-bs-toggle="tab" data-bs-target="#camera" type="button" role="tab" aria-controls="camera" aria-selected="true">
-                                    <i class="fas fa-camera"></i> Camera
+                                    <i class="fas fa-camera"></i> Capture Moment
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab" aria-controls="upload" aria-selected="false">
-                                    <i class="fas fa-upload"></i> Upload
+                                    <i class="fas fa-upload"></i> Share Memory
                                 </button>
                             </li>
                         </ul>
@@ -51,6 +53,11 @@
                                 <div class="camera-container">
                                     <video id="video" autoplay playsinline class="w-100 rounded"></video>
                                     <canvas id="canvas" class="d-none"></canvas>
+                                    <div class="camera-controls">
+                                        <button id="switchCamera" class="btn btn-outline-secondary camera-control-btn">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
                                     <div class="text-center mt-3">
                                         <button id="snap" class="btn btn-primary">
                                             <i class="fas fa-camera"></i> Capture
@@ -67,7 +74,7 @@
                                 <div class="upload-container text-center">
                                     <div class="upload-area p-5 mb-3 rounded" id="dropArea">
                                         <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
-                                        <p>Drag & drop an image or click to browse</p>
+                                        <p>Drag & drop a special moment or click to browse</p>
                                         <input type="file" id="fileInput" accept="image/*" class="d-none">
                                     </div>
                                     <div id="uploadPreview" class="d-none mb-3">
@@ -85,7 +92,7 @@
                         <!-- Generate button (only shown after an image is ready) -->
                         <div class="text-center mt-3">
                             <button id="generatePoem" class="btn btn-lg btn-primary d-none">
-                                <i class="fas fa-magic"></i> Generate Poetry
+                                <i class="fas fa-star"></i> Create Poetry For K
                             </button>
                         </div>
                     </div>
@@ -95,22 +102,24 @@
             <div class="col-lg-6">
                 <!-- Poetry Output Section -->
                 <div class="card shadow-sm" id="outputCard">
-                    <div class="card-header bg-secondary text-white">
-                        <i class="fas fa-feather-alt"></i> Your Poetry
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-feather-alt me-2"></i>
+                            <span>K's Personalized Poetry</span>
+                        </div>
                     </div>
                     <div class="card-body poem-container">
                         <!-- Initial state -->
                         <div id="initialState" class="text-center py-5">
-                            <i class="fas fa-feather fa-3x mb-3 text-muted"></i>
-                            <p class="text-muted">Your AI-generated poem will appear here</p>
+                            <p class="text-muted">Your poem will appear here, crafted just for you</p>
                         </div>
                         
                         <!-- Loading state -->
                         <div id="loadingState" class="text-center py-5 d-none">
-                            <div class="spinner-border text-primary mb-3" role="status">
+                            <div class="spinner-border mb-3" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <p>Crafting your poetry...</p>
+                            <p>Creating beautiful poetry inspired by your moment...</p>
                         </div>
                         
                         <!-- Error state -->
@@ -124,6 +133,9 @@
                         <div id="poemDisplay" class="d-none">
                             <div class="poem-text mb-4"></div>
                             <div class="poem-author text-end fst-italic"></div>
+                            <div class="poem-dedication mt-4 text-center">
+                                <small class="text-muted">— Created with care for K —</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -132,7 +144,7 @@
         
         <!-- Footer -->
         <footer class="mt-5 mb-4 text-center text-muted">
-            <p>Poetry Camera &copy; 2023 | Powered by Gemini AI</p>
+            <p>K's Poetry Camera &copy; <span id="current-year"></span> | Made with care just for you</p>
         </footer>
     </div>
 
@@ -140,5 +152,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- App Script -->
     <script src="script.js"></script>
+    <script>
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html> 

@@ -1,80 +1,266 @@
 /* General Styles */
+:root {
+    --primary-color: #2c5282; /* Dark blue */
+    --secondary-color: #3182ce; /* Medium blue */
+    --accent-color: #63b3ed; /* Light blue */
+    --background-color: #f7fafc;
+    --text-color: #2d3748;
+    --light-text: #4a5568;
+    --border-color: rgba(49, 130, 206, 0.2);
+    --card-shadow: 0 6px 20px rgba(49, 130, 206, 0.1);
+    --transition-speed: 0.3s;
+    --k-font: 'Dancing Script', cursive;
+}
+
 body {
-    background-color: #f8f9fa;
+    background-color: var(--background-color);
     font-family: 'Lora', serif;
-    color: #333;
+    color: var(--text-color);
     line-height: 1.6;
+    transition: background-color var(--transition-speed) ease;
+    background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2363b3ed' fill-opacity='0.1'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6h-2c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h-2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6h2c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h-2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
 .container {
     max-width: 1200px;
 }
 
+/* K Monogram Styles */
+.k-monogram-top {
+    font-family: var(--k-font);
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    position: absolute;
+    top: -15px;
+    left: -25px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    animation: float 6s infinite ease-in-out;
+    opacity: 0.7;
+}
+
+.k-monogram-upload {
+    font-family: var(--k-font);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    opacity: 0.5;
+}
+
+.k-monogram-corner {
+    font-family: var(--k-font);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    margin-left: auto;
+    margin-right: 5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.k-emblem {
+    font-family: var(--k-font);
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    opacity: 0.7;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    animation: pulse 4s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 0.7; }
+}
+
+@keyframes float {
+    0% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-7px) rotate(3deg); }
+    100% { transform: translateY(0) rotate(-5deg); }
+}
+
 /* Header Styles */
+.app-title-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    padding-left: 10px;
+}
+
 .app-title {
     font-family: 'Playfair Display', serif;
     font-weight: 700;
     font-size: 3rem;
-    margin-bottom: 0.5rem;
-    color: #343a40;
+    color: var(--primary-color);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    transition: color var(--transition-speed) ease;
+    position: relative;
+}
+
+.subtitle-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.app-subtitle {
+    font-family: var(--k-font);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+    position: relative;
+    display: inline-block;
+    margin-top: -0.5rem;
+}
+
+.app-subtitle::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
 }
 
 .app-tagline {
     font-style: italic;
-    color: #6c757d;
+    color: var(--light-text);
     font-size: 1.2rem;
 }
 
 /* Card Styles */
 .card {
     border: none;
-    border-radius: 10px;
+    border-radius: 15px;
     overflow: hidden;
     height: 100%;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(49, 130, 206, 0.15);
 }
 
 .card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: #fff;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+    color: var(--primary-color);
+    font-weight: 500;
 }
 
 #outputCard .card-header {
-    border-bottom: none;
+    background-color: var(--primary-color);
+    color: white;
+    font-family: 'Playfair Display', serif;
+    display: flex;
+    align-items: center;
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-color);
+    border: none;
+    padding: 0.75rem 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    background-color: transparent;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+    color: var(--secondary-color);
+    border-color: transparent;
 }
 
 /* Camera and Upload Styles */
 .camera-container, 
 .upload-container {
     min-height: 300px;
+    position: relative;
 }
 
 #video, 
 #canvas {
     width: 100%;
-    border-radius: 5px;
-    background-color: #e9ecef;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.camera-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 10;
+}
+
+.camera-control-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.camera-control-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
 }
 
 .upload-area {
-    border: 2px dashed #ced4da;
-    border-radius: 8px;
-    background-color: #f8f9fa;
+    border: 2px dashed var(--accent-color);
+    border-radius: 12px;
+    background-color: rgba(255, 247, 250, 0.7);
     cursor: pointer;
     transition: all 0.3s ease;
+    padding: 2.5rem !important;
+    position: relative;
 }
 
 .upload-area:hover {
-    border-color: #6c757d;
-    background-color: #e9ecef;
+    border-color: var(--primary-color);
+    background-color: rgba(49, 130, 206, 0.05);
 }
 
 .upload-area.active {
-    border-color: #0d6efd;
-    background-color: rgba(13, 110, 253, 0.05);
+    border-color: var(--primary-color);
+    background-color: rgba(49, 130, 206, 0.08);
 }
 
 #dropArea i {
-    color: #6c757d;
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+#dropArea:hover i {
+    color: var(--secondary-color);
+}
+
+#uploadPreview img {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    object-fit: contain;
 }
 
 /* Poetry Output Styles */
@@ -82,43 +268,108 @@ body {
     min-height: 300px;
     display: flex;
     flex-direction: column;
+    padding: 1.5rem !important;
 }
 
 .poem-text {
     font-family: 'Lora', serif;
-    line-height: 1.8;
+    line-height: 1.9;
     white-space: pre-line;
+    font-size: 1.1rem;
 }
 
 .poem-author {
     font-family: 'Playfair Display', serif;
     font-style: italic;
-    color: #6c757d;
+    color: var(--primary-color);
+    margin-top: 1rem;
+    text-align: right;
+}
+
+.poem-dedication {
+    font-family: var(--k-font);
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+    opacity: 0.7;
 }
 
 #poemDisplay {
-    padding: 20px 10px;
+    padding: 20px;
+    animation: fadeIn 1s ease;
+    background-color: rgba(255, 247, 250, 0.5);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Button Styles */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
 .btn-primary {
-    background-color: #5a67d8;
-    border-color: #5a67d8;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 .btn-primary:hover {
-    background-color: #4c51bf;
-    border-color: #4c51bf;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(49, 130, 206, 0.3);
 }
 
 .btn-outline-secondary {
-    color: #6c757d;
-    border-color: #6c757d;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 .btn-outline-secondary:hover {
-    background-color: #6c757d;
+    background-color: var(--primary-color);
     color: white;
+    transform: translateY(-2px);
+}
+
+#generatePoem {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: none;
+    box-shadow: 0 4px 15px rgba(49, 130, 206, 0.4);
+    transition: all 0.3s ease;
+}
+
+#generatePoem:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(49, 130, 206, 0.5);
+}
+
+#generatePoem:active {
+    transform: translateY(-1px);
+}
+
+/* Loading Animation */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    color: var(--primary-color);
+}
+
+#loadingState {
+    animation: pulse 2s infinite;
+}
+
+/* Heart decorations */
+.heart-decoration {
+    display: none; /* Hide hearts instead of deleting the class */
 }
 
 /* Responsive Adjustments */
@@ -127,8 +378,22 @@ body {
         font-size: 2.5rem;
     }
     
-    .main-content {
-        flex-direction: column;
+    .app-subtitle {
+        font-size: 1.5rem;
+    }
+    
+    .k-monogram-top {
+        font-size: 2.5rem;
+        top: -10px;
+        left: -15px;
+    }
+    
+    .k-monogram-corner {
+        font-size: 1.5rem;
+    }
+    
+    .k-emblem {
+        font-size: 3rem;
     }
     
     .camera-container, 
@@ -136,10 +401,87 @@ body {
     .poem-container {
         min-height: 250px;
     }
+    
+    .poem-text {
+        font-size: 1rem;
+        line-height: 1.8;
+    }
+    
+    #generatePoem {
+        width: 100%;
+    }
 }
 
-/* Loading Animation */
-.spinner-border {
-    width: 3rem;
-    height: 3rem;
+@media (max-width: 576px) {
+    .app-title {
+        font-size: 2rem;
+    }
+    
+    .app-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .app-tagline {
+        font-size: 1rem;
+    }
+    
+    .k-monogram-top {
+        font-size: 2rem;
+        top: -5px;
+        left: -10px;
+    }
+    
+    .k-emblem {
+        font-size: 3.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #1a202c;
+        --text-color: #f7fafc;
+        --light-text: #e2e2e2;
+        --border-color: rgba(99, 179, 237, 0.3);
+        --card-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    body {
+        background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2363b3ed' fill-opacity='0.05'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6h-2c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h-2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6h2c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h-2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    .card {
+        background-color: rgba(26, 32, 44, 0.95);
+    }
+    
+    .card-header {
+        background-color: #2d3748;
+        border-color: rgba(99, 179, 237, 0.2);
+    }
+    
+    .upload-area {
+        background-color: rgba(26, 32, 44, 0.7);
+        border-color: rgba(99, 179, 237, 0.3);
+    }
+    
+    .upload-area:hover, .upload-area.active {
+        background-color: rgba(49, 130, 206, 0.15);
+    }
+    
+    #poemDisplay {
+        background-color: rgba(45, 55, 72, 0.5);
+    }
+    
+    .poem-dedication {
+        color: var(--accent-color);
+    }
 } 
