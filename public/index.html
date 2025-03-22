@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poetry Camera</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="style.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Header -->
+        <header class="text-center mb-5">
+            <h1 class="app-title">Poetry Camera</h1>
+            <p class="app-tagline">Capture images, discover poetry.</p>
+        </header>
+        
+        <!-- Main content -->
+        <div class="row main-content">
+            <div class="col-lg-6 mb-4">
+                <!-- Input Section -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <!-- Tabs for Camera and Upload -->
+                        <ul class="nav nav-tabs card-header-tabs" id="inputTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="camera-tab" data-bs-toggle="tab" data-bs-target="#camera" type="button" role="tab" aria-controls="camera" aria-selected="true">
+                                    <i class="fas fa-camera"></i> Camera
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab" aria-controls="upload" aria-selected="false">
+                                    <i class="fas fa-upload"></i> Upload
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="inputTabsContent">
+                            <!-- Camera Tab -->
+                            <div class="tab-pane fade show active" id="camera" role="tabpanel" aria-labelledby="camera-tab">
+                                <div class="camera-container">
+                                    <video id="video" autoplay playsinline class="w-100 rounded"></video>
+                                    <canvas id="canvas" class="d-none"></canvas>
+                                    <div class="text-center mt-3">
+                                        <button id="snap" class="btn btn-primary">
+                                            <i class="fas fa-camera"></i> Capture
+                                        </button>
+                                        <button id="retake" class="btn btn-outline-secondary d-none">
+                                            <i class="fas fa-redo"></i> Retake
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Upload Tab -->
+                            <div class="tab-pane fade" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+                                <div class="upload-container text-center">
+                                    <div class="upload-area p-5 mb-3 rounded" id="dropArea">
+                                        <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                        <p>Drag & drop an image or click to browse</p>
+                                        <input type="file" id="fileInput" accept="image/*" class="d-none">
+                                    </div>
+                                    <div id="uploadPreview" class="d-none mb-3">
+                                        <img id="previewImage" class="img-fluid rounded" src="" alt="Preview">
+                                        <div class="mt-2">
+                                            <button id="removeUpload" class="btn btn-outline-secondary btn-sm">
+                                                <i class="fas fa-times"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Generate button (only shown after an image is ready) -->
+                        <div class="text-center mt-3">
+                            <button id="generatePoem" class="btn btn-lg btn-primary d-none">
+                                <i class="fas fa-magic"></i> Generate Poetry
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <!-- Poetry Output Section -->
+                <div class="card shadow-sm" id="outputCard">
+                    <div class="card-header bg-secondary text-white">
+                        <i class="fas fa-feather-alt"></i> Your Poetry
+                    </div>
+                    <div class="card-body poem-container">
+                        <!-- Initial state -->
+                        <div id="initialState" class="text-center py-5">
+                            <i class="fas fa-feather fa-3x mb-3 text-muted"></i>
+                            <p class="text-muted">Your AI-generated poem will appear here</p>
+                        </div>
+                        
+                        <!-- Loading state -->
+                        <div id="loadingState" class="text-center py-5 d-none">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p>Crafting your poetry...</p>
+                        </div>
+                        
+                        <!-- Error state -->
+                        <div id="errorState" class="text-center py-5 d-none">
+                            <i class="fas fa-exclamation-circle fa-3x mb-3 text-danger"></i>
+                            <p class="text-danger">Something went wrong. Please try again.</p>
+                            <p id="errorMessage" class="small text-muted"></p>
+                        </div>
+                        
+                        <!-- Poetry display -->
+                        <div id="poemDisplay" class="d-none">
+                            <div class="poem-text mb-4"></div>
+                            <div class="poem-author text-end fst-italic"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="mt-5 mb-4 text-center text-muted">
+            <p>Poetry Camera &copy; 2023 | Powered by Gemini AI</p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- App Script -->
+    <script src="script.js"></script>
+</body>
+</html> 
