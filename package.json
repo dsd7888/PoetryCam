@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "description": "A web application that generates AI poetry based on images from camera or uploads",
   "main": "server.js",
+  "engines": {
+    "node": ">=14"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "build": "mkdir -p .vercel/output && cp -r public .vercel/output/static",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

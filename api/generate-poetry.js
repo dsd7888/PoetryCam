@@ -1,37 +1,14 @@
-// Poetry Camera - Backend Server
-const express = require('express');
-const cors = require('cors');
+// Import required modules
 const multer = require('multer');
-const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const dotenv = require('dotenv');
 
 // Load environment variables
 dotenv.config();
 
-// Initialize Express app
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Configure CORS
-app.use(cors());
-
-// Serve static files from public directory
-app.use(express.static('public'));
-
-// Configure multer to store files in memory instead of disk
+// Configure multer to store files in memory
 const storage = multer.memoryStorage();
-const upload = multer({ 
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req, file, cb) => {
-    // Accept only image files
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-      return cb(new Error('Only image files are allowed!'), false);
-    }
-    cb(null, true);
-  }
-});
+const upload = multer({ storage });
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -46,20 +23,50 @@ function bufferToGenerativePart(buffer, mimeType) {
   };
 }
 
-// API endpoint for generating poetry from an image
-app.post('/generate-poetry', upload.single('image'), async (req, res) => {
+// Process the multer upload
+function runMiddleware(req, res, fn) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
+
+// API Handler for Vercel
+module.exports = async (req, res) => {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  // Only accept POST requests
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  
   try {
+    // Run the multer middleware
+    await runMiddleware(req, res, upload.single('image'));
+    
     if (!req.file) {
       return res.status(400).json({ error: 'No image provided' });
     }
-
-    // Get image data from memory (no file system operations)
+    
+    // Get image data from memory
     const imageBuffer = req.file.buffer;
     const mimeType = req.file.mimetype;
-
+    
     // Get the Gemini model with vision support
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
+    
     // Create prompt for image analysis
     const prompt = `
       Analyze this image and create a beautiful, unique poem inspired by what you see.
@@ -70,38 +77,19 @@ app.post('/generate-poetry', upload.single('image'), async (req, res) => {
       The poem should be 8-12 lines long.
       Also suggest a poetic name for the author that reflects the style of the poem.
     `;
-
-    // Prepare the image for the API - use buffer directly instead of file path
+    
+    // Prepare the image for the API
     const imagePart = bufferToGenerativePart(imageBuffer, mimeType);
-
+    
     // Generate the poetry
     const result = await model.generateContent([prompt, imagePart]);
     const response = await result.response;
     const text = response.text();
-
+    
     // Return the generated poetry
-    res.json({ poem: text });
+    return res.status(200).json({ poem: text });
   } catch (error) {
     console.error('Error generating poetry:', error);
-    res.status(500).json({ error: 'Failed to generate poetry', details: error.message });
+    return res.status(500).json({ error: 'Failed to generate poetry', details: error.message });
   }
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: 'Something went wrong!',
-    message: err.message
-  });
-});
-
-// For local development
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Poetry Camera server running on http://localhost:${PORT}`);
-  });
-}
-
-// Export the app for Vercel
-module.exports = app;
+}; 
