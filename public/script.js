@@ -224,8 +224,9 @@ generatePoem.addEventListener('click', async () => {
         const formData = new FormData();
         formData.append('image', blob, 'poetry_image.jpg');
         
-        // Make API request - use absolute URL to ensure it works on all deployments
-        const response = await fetch('/generate-poetry', {
+        // Make API request to the proper endpoint
+        const apiEndpoint = '/generate-poetry';
+        const response = await fetch(apiEndpoint, {
             method: 'POST',
             body: formData
         });
