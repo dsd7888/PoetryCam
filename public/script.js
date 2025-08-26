@@ -27,7 +27,8 @@ const poemAuthor = document.querySelector('.poem-author');
 const creativeControls = document.getElementById('creativeControls');
 const keywordInput = document.getElementById('keywordInput');
 const poetStyleInput = document.getElementById('poetStyleInput');
-const poemLengthInput = document.getElementById('poemLengthInput');
+const poemLengthSelect = document.getElementById('poemLengthSelect'); // New select element
+const customPoemLengthInput = document.getElementById('customPoemLengthInput'); // New custom input
 const instructionsInput = document.getElementById('instructionsInput');
 const retryPoem = document.getElementById('retryPoem');
 const copyPoem = document.getElementById('copyPoem');
@@ -40,22 +41,20 @@ let currentFacingMode = 'environment'; // 'environment' for back camera, 'user' 
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Check for camera support and initialize
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         initCamera();
     } else {
-        // Fallback for devices without camera support
         document.getElementById('upload-tab').click();
         document.getElementById('camera-tab').classList.add('d-none');
         showError('Camera access is not available on your device or browser. Please use the upload option.');
     }
-    addCameraEffects(); // Add the CSS for camera animations
+    addCameraEffects();
     document.documentElement.style.scrollBehavior = 'smooth';
 });
 
 // --- Event Listeners ---
 
-// Tab switching handlers
+// Tab switching
 document.getElementById('camera-tab').addEventListener('click', () => {
     activeTab = 'camera';
     initCamera();
@@ -70,11 +69,8 @@ switchCamera.addEventListener('click', () => {
     currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
     stopCamera();
     initCamera();
-    // Add animation effect when switching
     video.classList.add('switching');
-    setTimeout(() => {
-        video.classList.remove('switching');
-    }, 500);
+    setTimeout(() => video.classList.remove('switching'), 500);
 });
 
 snap.addEventListener('click', () => {
@@ -85,7 +81,19 @@ snap.addEventListener('click', () => {
     const context = canvas.getContext('2d');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // FIX: Handle mirroring for front camera
+    if (currentFacingMode === 'user') {
+        // For front camera, flip the captured image to match what user sees
+        context.save();
+        context.scale(-1, 1);
+        context.translate(-canvas.width, 0);
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        context.restore();
+    } else {
+        // For back camera, draw normally
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
 
     video.classList.add('d-none');
     canvas.classList.remove('d-none');
@@ -97,13 +105,7 @@ snap.addEventListener('click', () => {
     showCreativeControls();
 });
 
-retake.addEventListener('click', () => {
-    imageCapture = null;
-    hideCreativeControls();
-    initCamera();
-});
-
-// Drag and drop functionality
+// Upload controls
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
     dropArea.addEventListener(eventName, e => {
         e.preventDefault();
@@ -115,11 +117,9 @@ retake.addEventListener('click', () => {
         }
     }, false);
 });
-
 dropArea.addEventListener('drop', (e) => handleFile(e.dataTransfer.files[0]));
 dropArea.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-
 removeUpload.addEventListener('click', () => {
     imageCapture = null;
     fileInput.value = '';
@@ -128,10 +128,19 @@ removeUpload.addEventListener('click', () => {
     hideCreativeControls();
 });
 
+// --- Poem Length Custom Input Logic ---
+poemLengthSelect.addEventListener('change', () => {
+    if (poemLengthSelect.value === 'custom') {
+        customPoemLengthInput.classList.remove('d-none');
+        customPoemLengthInput.focus();
+    } else {
+        customPoemLengthInput.classList.add('d-none');
+    }
+});
+
 // Main action buttons
 generatePoem.addEventListener('click', () => triggerPoemGeneration());
 retryPoem.addEventListener('click', () => triggerPoemGeneration());
-
 copyPoem.addEventListener('click', () => {
     const fullText = `${poemText.innerText}\n${poemAuthor.innerText}`;
     navigator.clipboard.writeText(fullText).then(() => {
@@ -140,9 +149,7 @@ copyPoem.addEventListener('click', () => {
         setTimeout(() => {
             copyPoem.innerHTML = originalText;
         }, 2000);
-    }).catch(err => {
-        console.error('Failed to copy text: ', err);
-    });
+    }).catch(err => console.error('Failed to copy text: ', err));
 });
 
 window.addEventListener('beforeunload', stopCamera);
@@ -154,11 +161,19 @@ async function initCamera() {
         if (cameraStream) stopCamera();
         const constraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: currentFacingMode } };
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        if (isIOS) {
-            constraints.video.facingMode = { exact: currentFacingMode };
-        }
+        if (isIOS) constraints.video.facingMode = { exact: currentFacingMode };
+        
         cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = cameraStream;
+
+        // --- MIRROR FIX ---
+        // Add or remove the 'mirrored' class based on the camera's facing mode
+        if (currentFacingMode === 'user') {
+            video.classList.add('mirrored');
+        } else {
+            video.classList.remove('mirrored');
+        }
+
         video.classList.remove('d-none');
         canvas.classList.add('d-none');
         snap.classList.remove('d-none');
@@ -166,18 +181,6 @@ async function initCamera() {
         switchCamera.classList.remove('d-none');
     } catch (error) {
         console.error('Error accessing camera:', error);
-        if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
-            try {
-                const fallbackConstraints = { video: { facingMode: currentFacingMode === 'environment' ? 'user' : 'environment' } };
-                currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
-                cameraStream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
-                video.srcObject = cameraStream;
-                video.classList.remove('d-none');
-                return;
-            } catch (fallbackError) {
-                console.error('Fallback camera access failed:', fallbackError);
-            }
-        }
         showError('Could not access the camera. Please ensure permissions are granted.');
     }
 }
@@ -194,7 +197,7 @@ function handleFile(file) {
         showError('Please select a valid image file.');
         return;
     }
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+    if (file.size > 10 * 1024 * 1024) {
         showError('Please select an image smaller than 10MB.');
         return;
     }
@@ -222,10 +225,16 @@ async function triggerPoemGeneration() {
     try {
         const imageBlob = await dataURLToBlob(imageCapture);
         const formData = new FormData();
+        
+        let poemLengthValue = poemLengthSelect.value;
+        if (poemLengthValue === 'custom') {
+            poemLengthValue = customPoemLengthInput.value.trim();
+        }
+
         formData.append('image', imageBlob, 'capture.jpg');
         formData.append('keyword', keywordInput.value.trim());
         formData.append('poetStyle', poetStyleInput.value.trim());
-        formData.append('poemLength', poemLengthInput.value.trim());
+        formData.append('poemLength', poemLengthValue);
         formData.append('instructions', instructionsInput.value.trim());
 
         const response = await fetch('/api/generate-poetry', {
@@ -250,6 +259,7 @@ async function triggerPoemGeneration() {
     } catch (error) {
         console.error('Error generating poetry:', error);
         showError(error.message);
+    } finally {
         generatePoem.disabled = false;
         generatePoem.innerHTML = `<i class="fas fa-star"></i> Create Poetry For K`;
     }
@@ -270,9 +280,8 @@ function typeWriterEffect(poem, author) {
             setTimeout(typePoemText, typingSpeed);
         } else {
             setTimeout(() => {
-                if (author) {
-                    typeAuthorText(author);
-                } else {
+                if (author) typeAuthorText(author);
+                else {
                     generatePoem.disabled = false;
                     generatePoem.innerHTML = `<i class="fas fa-star"></i> Create Poetry For K`;
                 }
@@ -310,16 +319,44 @@ function processPoem(fullPoemText) {
     return { poem, author };
 }
 
-// --- UI State Management ---
+// --- UI State Management & Utilities ---
 
 function showCreativeControls() {
+    // Remove d-none class and add visible class
     generatePoem.classList.remove('d-none');
     creativeControls.classList.remove('d-none');
+    creativeControls.classList.add('visible');
+    
+    // Force visibility with inline styles as backup
+    creativeControls.style.display = 'block';
+    creativeControls.style.visibility = 'visible';
+    creativeControls.style.opacity = '1';
+    
+    // Scroll to creative controls for better UX
+    setTimeout(() => {
+        creativeControls.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest' 
+        });
+    }, 300);
+    
+    // Focus on first input for better accessibility
+    setTimeout(() => {
+        const firstInput = creativeControls.querySelector('input, select, textarea');
+        if (firstInput) firstInput.focus();
+    }, 500);
 }
 
+// UPDATED hideCreativeControls function
 function hideCreativeControls() {
     generatePoem.classList.add('d-none');
     creativeControls.classList.add('d-none');
+    creativeControls.classList.remove('visible');
+    
+    // Clear inline styles
+    creativeControls.style.display = '';
+    creativeControls.style.visibility = '';
+    creativeControls.style.opacity = '';
 }
 
 function setOutputState(state) {
@@ -335,8 +372,6 @@ function showError(message) {
     setOutputState('error');
 }
 
-// --- Utility and Effect Functions ---
-
 async function dataURLToBlob(dataURL) {
     const res = await fetch(dataURL);
     return await res.blob();
@@ -344,8 +379,7 @@ async function dataURLToBlob(dataURL) {
 
 function playShutterSound() {
     try {
-        const audio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAASAAAeMwAUFBQUFCIiIiIiIjAwMDAwPj4+Pj4+TExMTExZWVlZWVlnZ2dnZ2d1dXV1dXWIiIiIiIiWlpaWlpaioqKioqKwsLCwsLC+vr6+vr7Ly8vLy8vY2NjY2Njm5ubm5ubz8/Pz8/P///////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAQKAAAAAAAAHjOZTf9/AAAAAAAAAAAAAAAAAAAAAP/7kGQAAANUMEoFPeACNQV40KEYABEY41g5vAAA9RjpZxRwAImU+W8eshaFpAQgALAAYALATx/nYDYCMJ0HITQYYA7AH4c7MoGsnCMU5pnW+OQnBcDrQ9Xx7w37/D+PimYavV8elKUpT5fqx5VjV6vZ38eJR48eRKa9KUp7v396UgPHkQwMAAAAAA//8MAOp39CECAAhlIEEIIECBAgTT1oj///tEQYT0wgEIYxgDC09aIiE7u7u7uIiIz+LtoIQGE/+XAGYLjpTAIOGYYy0ZACgDgSNFxC7YYiINocwERjAEDhIy0mRoGwAE7lOTBsGhj1qrXNCU9GrgwSPr80jj0dIpT9DRUNHKJbRxiWSiifVHuD2b0EbjLkOUzSXztP3uE1JpHzV6NPq+f3P5T0/f/lNH7lWTavQ5Xz1yLVe653///qf93B7f/vMdaKJAAJAMAIwIMAHMpzDkoYwD8CR717zVb8/p54P3MikXGCEWhQOEAOAdP6v8b8oNL/EzdnROC8Zo+z+71O8VVAGIKFEglKbidkoLam0mAFiwo0ZoVExf/7kmQLgAEZknHcEAAA9JCNwAIgABWCVVQQQwAi2AqiUgqAAAdDFBYXLaTgzRmjVG0utCCmmtBsXMxnJmktE5P2lz3rrCz2a2Q/Z/tdYX/8/p5/l/227rz9l/5/S/8Jipr/KGS5r/xAkEiKnH///EJ3rp/3CDMc36K6MjEQsXv999wAD5ZF2EhABeF82MFAyv/g6vBJ1enP6ijo8Z1f4QCKN9POmnZ65fB7PJpNSGv/g8YHz7x8ya2ePTM0etyMZ/9FJir0vEndHd5ZzT97z2rz72pcCQc/e1njz7PRFDLfrZ51FY6OzrY90M3em9Lnq4d12XpGlKdLay5kMZD3ax12Wa5dbTb7Thrh17Yc4YSids8vOC6mFSk+2y/huLS7jhhZmab7HmRs8j33OrwdTib3//JRnaz74zr/9FrsNSEAAFt0CAeFOkdnpzwKoIAlV/pzVqqn1A0jQ5Xn6hhjydR6nQYJH5YumfXQ4GkKdx6nU+746dHsdubX5nCrHsxXN4lDLnYWvQzHVfGNXK1KibmcLX5kMVpqRVjTUtx6hKk1pqenTv0lS76PJ//9X+Z3Vyz11E//+45W3MML//// SANIAAADQAsgoG5AACD/+5JkC4ABSJQy/whAAB7Shn/BDAAEwlFMAGQAIJ2KKVGMgAT8DJB4USgFgIFUfOvn4QDgADqQDrVmWDTNMzDBhZqDAoVWWIyGF0OBwqBhNLDhc+Z/t3aFnJUZLJSaE/CvM0tI1lXKPQtLQuImE0X63DLnKHRdMsDgcTigMJA4mFQsMe8qukigNLW8XP8OSuQY8lw9/+6Keqti93JhOCApwBEHAAmBQQAD4MwbAVAS7XwuIKFBtuThuW6WgAFn4v5yL5cMIgV8vlMvl8x4NeKnMfe8GBwMBgTB4UweDzJ0x4MGmTDg1ycNmTCriJk1c+9GlTVmTGW2lzpj023tdal1tJqS2lBYGD6ewaDQmFjGlTrqZTrpiep1WT2lDYaD9L31JbTpzbdYm1rUfpdsMB9K317aWlttKDQMHy73u13trQdrCdMHK7Md7u0ICl9LvaxHpYWF4oFl///EiBPAAAIAAIBQbBFJxcAAMAHSaBgRBqG4RCCLE6iCpyBVrKuJpnAFGcTwNz6BUzgVDcXxVJAFgwEhQIAVG0RiseR1I4FRJGkVifes5xTGkVxnOJ2JY3iSQBINwlkcZxfHETx1I4FRVFsMjmR4qjKSY8i6PYljeJo6jSOZJkqT5Tk2WJIlCTpUlaVZTlmXpel6B0qiAWA0mASh8MBIPAIDAPjmFAYCIOAeGgJnULhkCAsCwJggHgLmOJAJL///7kmQMgAI6UdlJ4lwAmGo6Jj0jwAY1Udi5/WAAyK7FSuvYAJqiggfFxHXhq9EQQNIkAiJgghYNYEAQFXhFBQiBQEyJAoiZEgTREiYNImRMqEVKhLkVMqJFSolVKibuqoIqoVUxBTUUzLjk4LjOqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq');
-        audio.play();
+        const audio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAASAAAeMwAUFBQUFCIiIiIiIjAwMDAwPj4+Pj4+TExMTExZWVlZWVlnZ2dnZ2d1dXV1dXWIiIiIiIiWlpaWlpaioqKioqKwsLCwsLC+vr6+vr7Ly8vLy8vY2NjY2Njm5ubm5ubz8/Pz8/P///////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAQKAAAAAAAAHjOZTf9/AAAAAAAAAAAAAAAAAAAAAP/7kGQAAANUMEoFPeACNQV40KEYABEY41g5vAAA9RjpZxRwAImU+W8eshaFpAQgALAAYALATx/nYDYCMJ0HITQYYA7AH4c7MoGsnCMU5pnW+OQnBcDrQ9Xx7w37/D+PimYavV8elKUpT5fqx5VjV6vZ38eJR48eRKa9KUp7v396UgPHkQwMAAAAAA//8MAOp39CECAAhlIEEIIECBAgTT1oj///tEQYT0wgEIYxgDC09aIiE7u7u7uIiIz+LtoIQGE/+XAGYLjpTAIOGYYy0ZACgDgSNFxC7YYiINocwERjAEDhIy0mRoGwAE7lOTBsGhj1qrXNCU9GrgwSPr80jj0dIpT9DRUNHKJbRxiWSiifVHuD2b0EbjLkOUzSXztP3uE1JpHzV6NPq+f3P5T0/f/lNH7lWTavQ5Xz1yLVe653///qf93B7f/vMdaKJAAJAMAIwIMAHMpzDkoYwD8CR717zVb8/p54P3MikXGCEWhQOEAOAdP6v8b8oNL/EzdnROC8Zo+z+71O8VVAGIKFEglKbidkoLam0mAFiwo0ZoVExf/7kmQLgAEZknHcEAAA9JCNwAIgABWCVVQQQwAi2AqiUgqAAAdDFBYXLaTgzRmjVG0utCCmmtBsXMxnJmktE5P2lz3rrCz2a2Q/Z/tdYX/8/p5/l/227rz9l/5/S/8Jipr/KGS5r/xAkEiKnH///EJ3rp/3CDMc36K6MjEQsXv999wAD5ZF2EhABeF82MFAyv/g6vBJ1enP6ijo8Z1f4QCKN9POmnZ65fB7PJpNSGv/g8YHz7x8ya2ePTM0etyMZ/9FJir0vEndHd5ZzT97z2rz72pcCQc/e1njz7PRFDLfrZ51FY6OzrY90M3em9Lnq4d12XpGlKdLay5kMZD3ax12Wa5dbTb7Thrh17Yc_YYSids8vOC6mFSk+2y/huLS7jhhZmab7HmRs8j33OrwdTib3//JRnaz74zr/9FrsNSEAAFt0CAeFOkdnpzwKoIAlV/pzVqqn1A0jQ5Xn6hhjydR6nQYJH5YumfXQ4GkKdx6nU+746dHsdubX5nCrHsxXN4lDLnYWvQzHVfGNXK1KibmcLX5kMVpqRVjTUtx6hKk1pqenTv0lS76PJ//9X+Z3Vyz11E//+45W3MML//// SANIAAADQAsgoG5AACD/+5JkC4ABSJQy/whAAB7Shn/BDAAEwlFMAGQAIJ2KKVGMgAT8DJB4USgFgIFUfOvn4QDgADqQDrVmWDTNMzDBhZqDAoVWWIyGF0OBwqBhNLDhc+Z/t3aFnJUZLJSaE/CvM0tI1lXKPQtLQuImE0X63DLnKHRdMsDgcTigMJA4mFQsMe8qukigNLW8XP8OSuQY8lw9/+6Keqti93JhOCApwBEHAAmBQQAD4MwbAVAS7XwuIKFBtuThuW6WgAFn4v5yL5cMIgV8vlMvl8x4NeKnMfe8GBwMBgTB4UweDzJ0x4MGmTDg1ycNmTCriJk1c+9GlTVmTGW2lzpj023tdal1tJqS2lBYGD6ewaDQmFjGlTrqZTrpiep1WT2lDYaD9L31JbTpzbdYm1rUfpdsMB9K317aWlttKDQMHy73u13trQdrCdMHK7Md7u0ICl9LvaxHpYWF4oFl///EiBPAAAIAAIBQbBFJxcAAMAHSaBgRBqG4RCCLE6iCpyBVrKuJpnAFGcTwNz6BUzgVDcXxVJAFgwEhQIAVG0RiseR1I4FRJGkVifes5xTGkVxnOJ2JY3iSQBINwlkcZxfHETx1I4FRVFsMjmR4qjKSY8i6PYljeJo6jSOZJkqT5Tk2WJIlCTpUlaVZTlmXpel6B0qiAWA0mASh8MBIPAIDAPjmFAYCIOAeGgJnULhkCAsCwJggHgLmOJAJL///7kmQMgAI6UdlJ4lwAmGo6Jj0jwAY1Udi5/WAAyK7FSuvYAJqiggfFxHXhq9EQQNIkAiJgghYNYEAQFXhFBQiBQEyJAoiZEgTREiYNImRMqEVKhLkVMqJFSolVKibuqoIqoVUxBTUUzLjk4LjOqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq');
     } catch (error) {
         console.error('Error playing shutter sound:', error);
     }

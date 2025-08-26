@@ -105,10 +105,22 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="poemLengthInput" placeholder="e.g., 8-12 lines">
-                                <label for="poemLengthInput"><i class="fas fa-ruler-vertical me-2"></i>Desired Poem Length</label>
+                            
+                            <!-- NEW: Poem Length Selector -->
+                            <div class="mb-3">
+                                <label for="poemLengthSelect" class="form-label text-muted small"><i class="fas fa-ruler-vertical me-2"></i>Desired Poem Length</label>
+                                <div class="input-group">
+                                    <select class="form-select" id="poemLengthSelect">
+                                        <option value="4 lines" selected>4 lines (Short)</option>
+                                        <option value="8 lines">8 lines (Medium)</option>
+                                        <option value="12 lines">12 lines (Long)</option>
+                                        <option value="16 lines">16 lines (Epic)</option>
+                                        <option value="custom">Custom...</option>
+                                    </select>
+                                    <input type="text" class="form-control d-none" id="customPoemLengthInput" placeholder="e.g., A sonnet">
+                                </div>
                             </div>
+
                             <div class="form-floating mb-3">
                                 <textarea class="form-control" placeholder="e.g., Make it hopeful" id="instructionsInput" style="height: 100px" maxlength="200"></textarea>
                                 <label for="instructionsInput"><i class="fas fa-list-check me-2"></i>Special Instructions</label>
