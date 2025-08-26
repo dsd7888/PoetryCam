@@ -6,32 +6,32 @@
     <title>K's Poetry Camera</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="style.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital@0;1&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="style.css" rel="stylesheet">
 </head>
 <body>
     <div class="container mt-4">
         <!-- Header -->
         <header class="text-center mb-5">
             <div class="app-title-wrapper">
+                <span class="k-monogram-top">K</span>
                 <h1 class="app-title">For You</h1>
             </div>
-            <p class="app-tagline">Crafting poetry just for you.</p>
+            <p class="app-tagline">Crafting poetry from your moments.</p>
         </header>
-        
+
         <!-- Main content -->
         <div class="row main-content">
             <div class="col-lg-6 mb-4">
                 <!-- Input Section -->
                 <div class="card shadow-sm">
                     <div class="card-header">
-                        <!-- Tabs for Camera and Upload -->
                         <ul class="nav nav-tabs card-header-tabs" id="inputTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="camera-tab" data-bs-toggle="tab" data-bs-target="#camera" type="button" role="tab" aria-controls="camera" aria-selected="true">
@@ -46,7 +46,6 @@
                         </ul>
                     </div>
                     <div class="card-body">
-                        <!-- Tab Content -->
                         <div class="tab-content" id="inputTabsContent">
                             <!-- Camera Tab -->
                             <div class="tab-pane fade show active" id="camera" role="tabpanel" aria-labelledby="camera-tab">
@@ -88,8 +87,35 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Creative Controls Section -->
+                        <div id="creativeControls" class="mt-4 d-none">
+                            <h6 class="text-muted mb-3"><i class="fas fa-magic-wand-sparkles me-2"></i>Add a Creative Touch (Optional)</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="keywordInput" placeholder="e.g., Dusk">
+                                        <label for="keywordInput"><i class="fas fa-key me-2"></i>Keyword to Include</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="poetStyleInput" placeholder="e.g., Emily Dickinson">
+                                        <label for="poetStyleInput"><i class="fas fa-feather-alt me-2"></i>Inspired by Style of</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="poemLengthInput" placeholder="e.g., 8-12 lines">
+                                <label for="poemLengthInput"><i class="fas fa-ruler-vertical me-2"></i>Desired Poem Length</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <textarea class="form-control" placeholder="e.g., Make it hopeful" id="instructionsInput" style="height: 100px" maxlength="200"></textarea>
+                                <label for="instructionsInput"><i class="fas fa-list-check me-2"></i>Special Instructions</label>
+                            </div>
+                        </div>
                         
-                        <!-- Generate button (only shown after an image is ready) -->
+                        <!-- Generate button -->
                         <div class="text-center mt-3">
                             <button id="generatePoem" class="btn btn-lg btn-primary d-none">
                                 <i class="fas fa-star"></i> Create Poetry For K
@@ -111,7 +137,7 @@
                     <div class="card-body poem-container">
                         <!-- Initial state -->
                         <div id="initialState" class="text-center py-5">
-                            <p class="text-muted">Your poem will appear here, crafted just for you</p>
+                            <p class="text-muted">Your poem will appear here, crafted just for you.</p>
                         </div>
                         
                         <!-- Loading state -->
@@ -119,7 +145,7 @@
                             <div class="spinner-border mb-3" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <p>Creating beautiful poetry inspired by your moment...</p>
+                            <p>Weaving words inspired by your moment...</p>
                         </div>
                         
                         <!-- Error state -->
@@ -133,6 +159,14 @@
                         <div id="poemDisplay" class="d-none">
                             <div class="poem-text mb-4"></div>
                             <div class="poem-author text-end fst-italic"></div>
+                             <div class="poem-actions">
+                                <button id="retryPoem" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-sync-alt"></i> Retry
+                                </button>
+                                <button id="copyPoem" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
                             <div class="poem-dedication mt-4 text-center">
                                 <small class="text-muted">— Created with care for K —</small>
                             </div>
@@ -157,4 +191,4 @@
         document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
 </body>
-</html> 
+</html>
