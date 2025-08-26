@@ -1,10 +1,12 @@
 {
   "version": 2,
+  "public": true,
   "builds": [
-    { "src": "api/generate-poetry.js", "use": "@vercel/node" }
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/generate-poetry.js" },
+    { "src": "/generate-poetry", "dest": "/api/generate-poetry.js" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
